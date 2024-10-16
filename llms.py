@@ -12,6 +12,7 @@ from PIL import Image
 from io import BytesIO
 import numpy as np
 from langchain_google_genai import ChatGoogleGenerativeAI
+from brain_cancer_detection import predict
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 load_dotenv() 
@@ -28,8 +29,8 @@ conv_chain_vision = ConversationChain(llm=model_vision, memory=memory_vision)
 promp_vision = ChatPromptTemplate.from_messages([
     (
         "system", 
-    '''Your task is to classify the given image is related to brain, breast or whether it is a medical prescription. Provide
-    only the answer.Ask the user what type of image is this. If user says its related to brain then output 1 . if its related to brest output 2'''),
+    '''Your task is to classify the given image is related to brain, breast or whether it is a medical prescription.Ask the user what type of image is this. If user says its related to brain then output 1 . if its related to brest output 2. Provide
+    only the answer'''),
     (
         ("human", "{input} {text}")
     )
@@ -71,6 +72,7 @@ async def get_image_response(file:UploadFile = File(...), text=str):
     encoded_img = base64.b64encode(file_content).decode('utf-8')
     formated_prompt = promp_vision.format(input=encoded_img, text=text)
     result = conv_chain_vision(formated_prompt)
-    choice = int(result['response'])
+    choice = (int(result['response']))
+    print(choice)
     if choice == 1:
-        
+        print(predict(img_cv))
